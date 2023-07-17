@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@alchemy/aa-alchemy": "^0.1.0-alpha.16",
     "@alchemy/aa-core": "^0.1.0-alpha.16",
     "@types/node": "20.2.5",
     "@types/react": "18.2.9",

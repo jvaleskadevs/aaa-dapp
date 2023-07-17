@@ -5,8 +5,9 @@ import styles from "./homeComponent.module.css";
 import {
   //SimpleSmartContractAccount,
   SmartAccountProvider,
-  type SimpleSmartAccountOwner,
+  type SimpleSmartAccountOwner
 } from "@alchemy/aa-core";
+import { alchemyPaymasterAndDataMiddleware } from "@alchemy/aa-alchemy";
 import { CustomSimpleSmartContractAccount } from "@/libs/CustomSimpleSmartContractAccount";
 import { polygonMumbai } from "viem/chains";
 import { toHex, parseEther, formatEther, parseAbiItem, encodeFunctionData } from "viem";
@@ -18,7 +19,8 @@ import {
   SIMPLE_ACCOUNT_FACTORY_ADDRESS,
   NFT_CONTRACT_ADDRESS,
   NFT_CONTRACT_ABI,
-  CustomSimpleAccountAbi
+  CustomSimpleAccountAbi,
+  PAYMASTER_POLICY_ID
 } from "@/app/constants";
 import { useCustomAccountOwner } from "@/hooks/useCustomAccountOwner";
 import ModalComponent from "@/components/modalComponent";
@@ -92,7 +94,23 @@ export default function HomeComponent() {
     setSmartAccountProvider(provider);
     setSmartWalletAddress(accountAddress);
   };
-  
+
+  // Allow users to connect a paymaster to their Smart Wallets
+  const connectSmartWalletToPaymaster = async () => {
+    setShowModal(0);
+    if (!smartAccountProvider) return;
+    
+    const provider = await smartAccountProvider.withPaymasterMiddleware(
+      alchemyPaymasterAndDataMiddleware({
+        provider: smartAccountProvider.rpcClient,
+        policyId: PAYMASTER_POLICY_ID,
+        entryPoint: ENTRYPOINT_ADDRESS,
+      })
+    ); 
+    
+    setSmartAccountProvider(provider);
+    setMessage("Paymaster successfully connected to your Smart Wallet");
+  }
   
   // Allow users to fund their CustomSmartWallet
   const fundSmartWallet = async () => {
@@ -343,6 +361,12 @@ export default function HomeComponent() {
           onClick={() => openModal(3)}
         >
           Connect to SW From Recovery
+        </button>
+        <button
+          className={styles.button}
+          onClick={connectSmartWalletToPaymaster}
+        >
+          Connect SW to Paymaster
         </button>
       </div>
       
